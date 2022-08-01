@@ -20,41 +20,25 @@ async function getAndShowStoriesOnStart() {
  */
 
 function generateStoryMarkup(story) {
+  const commonHTML = `<a href="${story.url}" target="a_blank" class="story-link">${story.title}</a>
+    <small class="story-hostname">(${story.getHostName()})</small>
+    <small class="story-author">by ${story.author}</small>
+    <small class="story-user">posted by ${story.username}</small></li>`
+    
   if (currentUser) {
       if (story.username === currentUser.username) {
         return $(`
         <li id="${story.storyId}"><span class="edit"></span><span class="waste"></span><span class="star" data-id="${story.storyId}"></span>
-          <a href="${story.url}" target="a_blank" class="story-link">
-            ${story.title}
-          </a>
-          <small class="story-hostname">(${story.getHostName()})</small>
-          <small class="story-author">by ${story.author}</small>
-          <small class="story-user">posted by ${story.username}</small>
-        </li>
-      `);
+      `+commonHTML);
       } else {
         return $(`
         <li id="${story.storyId}"><span class="star" data-id="${story.storyId}"></span>
-          <a href="${story.url}" target="a_blank" class="story-link">
-            ${story.title}
-          </a>
-          <small class="story-hostname">(${story.getHostName()})</small>
-          <small class="story-author">by ${story.author}</small>
-          <small class="story-user">posted by ${story.username}</small>
-        </li>
-      `);
+      `+commonHTML);
       }
   } else {
     return $(`
     <li id="${story.storyId}">
-      <a href="${story.url}" target="a_blank" class="story-link">
-        ${story.title}
-      </a>
-      <small class="story-hostname">(${story.getHostName()})</small>
-      <small class="story-author">by ${story.author}</small>
-      <small class="story-user">posted by ${story.username}</small>
-    </li>
-  `);
+  `+commonHTML);
   }
 }
 
@@ -65,37 +49,31 @@ function putStoriesOnPage() {
 
   $allStoriesList.empty();
 
-  // loop through all of our stories and generate HTML for them
-  for (let story of storyList.stories) {
-    const $story = generateStoryMarkup(story);
-    $allStoriesList.append($story);
-  }
-
-  //apply icons to stories that need them (everything gets a star)
+  //if a story is in favorites, then give it the filled in star html character.
+  //if not, keep empty star assigned beforehand
   if (currentUser) {
-    $('.edit').css('cursor', 'pointer').css('font-size', '20px').html('&#128393;');
-    $('.waste').css('cursor', 'pointer').css('font-size', '20px').html('&#128465;'); //'&#128465;
-    $('.star').css('cursor', 'pointer').css('font-size', '20px').html('&#10025;');
-  
-
-    //if a story is in favorites, then give it the filled in star html character.
-    //if not, keep empty star assigned above
-    console.log(context);
-    if (context === 'navAllStories') {
-      const favorites = currentUser.favorites;
-      const kids = $('#all-stories-list .star');
-
-      for (let x=0; x < favorites.length; x++ ) {
-        for (const kid of kids) {
-          if (favorites[x].storyId === $(kid).attr('data-id')) {
-            $(kid).css('cursor', 'pointer').css('font-size', '20px').html('&#9733;'); //css .star { content: &#9733;'); adding forms to hidepagecomponents; html generation code duplication; strategy pattern
-            $(kid).toggleClass('favorite');
-            break;
-          }
+    console.log('curr user');
+    const favorites = currentUser.favorites;
+    // loop through all of our stories and generate HTML for them
+    for (let story of storyList.stories) {
+        const $story = generateStoryMarkup(story);
+        $allStoriesList.append($story);
+        const span = ($('ol li span').last());
+        span.css('cursor', 'pointer').css('font-size', '20px').html('&#10025;');
+        if (favorites.length > 0) {
+            for (let x=0;x<favorites.length;x++) {
+                if (favorites[x].storyId === story.storyId) {
+                    span.css('cursor', 'pointer').css('font-size', '20px').html('&#9733;');
+                    break;
+                }
+            }
         }
-      }
     }
-  
+
+    $('.edit').css('cursor', 'pointer').css('font-size', '20px').html('&#128393;');
+    $('.waste').css('cursor', 'pointer').css('font-size', '20px').html('&#128465;');
+    
+    //Event Listeners
     //what happens when you click a star
     $('.star').on('click', makeUnmakeFavorite);
 
@@ -104,6 +82,15 @@ function putStoriesOnPage() {
 
     //edit story. populate initial values
     $('.edit').on('click', editStory);
+
+  } else {
+    //no special story treatment for non-logged in users
+    //loop through all of our stories and generate HTML for them
+    for (let story of storyList.stories) {
+        console.log('getting here');
+        const $story = generateStoryMarkup(story);
+        $allStoriesList.append($story);
+    }
   }
 
   $allStoriesList.show();
