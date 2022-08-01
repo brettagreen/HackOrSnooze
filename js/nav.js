@@ -53,8 +53,7 @@ $('#nav-favorites').on('click', filterFavorites);
 function showUpdateProfile(e) {
   context = 'navProfile';
   hidePageComponents();
-  const userForm = $('#user-form');
-  userForm.show();
+  $userForm.show();
 
 }
 
@@ -101,7 +100,6 @@ $('#user-submit-button').on('click', async function(e) {
     }
 
     $('#user-form input').val('');
-    $('#user-form').hide();
 
     navAllStories();
 

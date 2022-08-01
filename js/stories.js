@@ -88,7 +88,7 @@ function putStoriesOnPage() {
       for (let x=0; x < favorites.length; x++ ) {
         for (const kid of kids) {
           if (favorites[x].storyId === $(kid).attr('data-id')) {
-            $(kid).css('cursor', 'pointer').css('font-size', '20px').html('&#9733;');
+            $(kid).css('cursor', 'pointer').css('font-size', '20px').html('&#9733;'); //css .star { content: &#9733;'); adding forms to hidepagecomponents; html generation code duplication; strategy pattern
             $(kid).toggleClass('favorite');
             break;
           }
@@ -111,8 +111,8 @@ function putStoriesOnPage() {
 
 async function editStory(e) {
   hidePageComponents();
-  const editForm = $('#edit-form');
-  editForm.show();
+  console.log('getting here');
+  $editForm.show()
   const inputs = $('#edit-form input');
   const storyId = $(this).parent().attr('id');
 
@@ -123,13 +123,13 @@ async function editStory(e) {
   inputs.eq(0).val(`${myStory.author}`);
   inputs.eq(1).val(`${myStory.title}`);
   inputs.eq(2).val(`${myStory.url}`);
+  console.log(storyId);
   localStorage.setItem('id', storyId);
 }
 
 $('#edit-submit-button').on('click', async function() {
     const id = localStorage.getItem('id');
-    console.log(id);
-    localStorage.removeItem('id');
+    console.log(localStorage);
     const inputs = $('#edit-form input');
     const myStory = storyList.stories.find(function(val) {
       return val.storyId === id;
@@ -168,7 +168,8 @@ $('#edit-submit-button').on('click', async function() {
         putStoriesOnPage()
       }
       inputs.val('');
-      $('#edit-form').hide();
+      localStorage.removeItem('id');
+
     }
   });
 
